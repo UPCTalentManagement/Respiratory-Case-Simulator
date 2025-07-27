@@ -338,39 +338,87 @@
             updateProgress();
         }
 
+        // function loadCase(caseIndex) {
+        //     const caseData = cases[caseIndex];
+        //     document.getElementById("symptoms").textContent = caseData.symptoms;
+            
+        //     const medPool = document.getElementById("medication-pool");
+        //     medPool.innerHTML = '';
+            
+        //     caseData.allowedMeds.forEach(med => {
+        //         const card = document.createElement("div");
+        //         card.className = "med-card";
+        //         card.draggable = true;
+        //         card.innerHTML = `
+        //             <img src="${med.image}" alt="${med.name}">
+        //             <div>${med.name}</div>
+        //         `;
+        //         //card.addEventListener("dragstart", dragStart);
+        //         //card.addEventListener('click', handleMedicationClick);
+        //         //card.addEventListener('touchstart', handleMedicationClick);
+        //         card.addEventListener("dragstart", dragStart);
+        //         card.addEventListener("click", handleMedicationClick); // desktop
+        //         card.addEventListener("touchstart", handleMedicationTapStart); // mobile tap start
+        //         card.addEventListener("touchend", handleMedicationTapEnd);     // mobile tap end
+
+        //         medPool.appendChild(card);
+        //     });
+        // }
+
         function loadCase(caseIndex) {
-            const caseData = cases[caseIndex];
-            document.getElementById("symptoms").textContent = caseData.symptoms;
-            
-            const medPool = document.getElementById("medication-pool");
-            medPool.innerHTML = '';
-            
-            caseData.allowedMeds.forEach(med => {
-                const card = document.createElement("div");
-                card.className = "med-card";
-                card.draggable = true;
-                card.innerHTML = `
-                    <img src="${med.image}" alt="${med.name}">
-                    <div>${med.name}</div>
-                `;
-                card.addEventListener("dragstart", dragStart);
-                card.addEventListener('click', handleMedicationClick);
-                card.addEventListener('touchstart', handleMedicationClick);
-                medPool.appendChild(card);
-            });
-        }
+    const caseData = cases[caseIndex];
+    document.getElementById("symptoms").textContent = caseData.symptoms;
+
+    const medPool = document.getElementById("medication-pool");
+    medPool.innerHTML = '';
+
+    caseData.allowedMeds.forEach(med => {
+        const card = document.createElement("div");
+        card.className = "med-card";
+        card.draggable = true;
+        card.innerHTML = `
+            <img src="${med.image}" alt="${med.name}">
+            <div>${med.name}</div>
+        `;
+        card.addEventListener("dragstart", dragStart);
+        card.addEventListener("click", () => toggleMedicationSelection(card));
+        medPool.appendChild(card);
+    });
+}
+
 
         function dragStart(e) {
             draggedItem = e.target.closest('.med-card');
             e.dataTransfer.setData("text/plain", draggedItem.querySelector("div").textContent);
         }
 
-        function handleMedicationClick(e) {
-            const card = e.currentTarget;
-            card.classList.add('mobile-tap-active');
-            setTimeout(() => card.classList.remove('mobile-tap-active'), 200);
-            toggleMedicationSelection(card);
-        }
+        // function handleMedicationClick(e) {
+        //     const card = e.currentTarget;
+        //     card.classList.add('mobile-tap-active');
+        //     setTimeout(() => card.classList.remove('mobile-tap-active'), 200);
+        //     toggleMedicationSelection(card);
+        // }
+
+//         function handleMedicationTapStart(e) {
+//     e.currentTarget.dataset.touchStartY = e.touches[0].clientY;
+//     e.currentTarget.dataset.touchStartX = e.touches[0].clientX;
+// }
+
+// function handleMedicationTapEnd(e) {
+//     const card = e.currentTarget;
+//     const startY = parseFloat(card.dataset.touchStartY);
+//     const startX = parseFloat(card.dataset.touchStartX);
+//     const endY = e.changedTouches[0].clientY;
+//     const endX = e.changedTouches[0].clientX;
+
+//     const dy = Math.abs(endY - startY);
+//     const dx = Math.abs(endX - startX);
+
+//     // Threshold to detect tap (not swipe or scroll)
+//     if (dy < 10 && dx < 10) {
+//         toggleMedicationSelection(card);
+//     }
+// }
 
         function toggleMedicationSelection(card) {
             const medication = card.querySelector("div").textContent;
@@ -392,6 +440,7 @@
             updateSubmitButton();
         }
 
+        
         function handleDragOver(e) {
             e.preventDefault();
             e.currentTarget.classList.add('drag-over');
@@ -452,6 +501,7 @@
                 timeLeft = Math.max(0, timeLeft - 15);
                 document.getElementById("timer").textContent = timeLeft;
                 returnMedicationsToPool();
+                
             }
 
             document.getElementById("score").textContent = score;
@@ -468,7 +518,7 @@
         }
 
         function startTimer() {
-            timeLeft = 60;
+            timeLeft = 180;
             document.getElementById("timer").textContent = timeLeft;
             
             timerInterval = setInterval(() => {
