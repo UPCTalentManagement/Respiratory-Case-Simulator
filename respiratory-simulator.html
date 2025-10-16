@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta property="og:title" content="Respiratory Case Simulator">
+    <meta property="og:description" content="Interactive Case Simulator for Respiratory Conditions">
+    <meta property="og:type" content="website">
+    <meta property="og:image" content="icon.png">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعبة الحالات التنفسية</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --primary: #1e3a5f;
+            --secondary: #2196F3;
+            --success: #4CAF50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --info: #00bcd4;
+            --light: #f5f7fa;
+            --dark: #2c3e50;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 25px rgba(0,0,0,0.15);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #66eac9 0%, #4b91a2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,160C384,160,480,128,576,112C672,96,768,96,864,112C960,128,1056,160,1152,160C1248,160,1344,128,1392,112L1440,96L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>') no-repeat bottom;
+            background-size: cover;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #game-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+            display: none;
+            z-index: 1;
+        }
+
+        #score-timer {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--secondary);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+        }
+
+        .stat-icon {
+            font-size: 2.5em;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--secondary), var(--info));
+            color: white;
+            box-shadow: 0 4px 10px rgba(33, 150, 243, 0.3);
+        }
+
+        .stat-content {
+            flex: 1;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .stat-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            color: var(--dark);
+            margin-top: 5px;
+        }
+
+        .progress-container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .progress-title {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 1.1em;
+        }
+
+        .progress-percentage {
+            font-weight: bold;
+            color: var(--secondary);
+            font-size: 1.2em;
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 20px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success), var(--info));
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            right: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        #case-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #case-container::before {
+            content: '🏥';
+            position: absolute;
+            top: -20px;
+            right: -20px;
+            font-size: 8em;
+            opacity: 0.05;
+            transform: rotate(-15deg);
+        }
+
+        #patient-header {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-size: 1.6em;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        #patient-header::before {
+            content: '🩺';
+            font-size: 1.2em;
+        }
+
+        #symptoms {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 25px;
+            border-radius: 15px;
+            border-right: 5px solid var(--secondary);
+            font-size: 1.15em;
+            line-height: 1.8;
+            color: var(--dark);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        #drop-zone {
+            border: 3px dashed var(--success);
+            border-radius: 15px;
+            padding: 25px;
+            min-height: 120px;
+            background: linear-gradient(135deg, rgba(76, 175, 80, 0.05), rgba(0, 188, 212, 0.05));
+            transition: all 0.3s ease;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        #drop-zone.empty::before {
+            content: '📦 اسحب أو اضغط على الأدوية هنا';
+            position: absolute;
+            font-size: 1.2em;
+            color: #999;
+            pointer-events: none;
+        }
+
+        #drop-zone:not(.empty)::before {
+            display: none;
+        }
+
+        .drag-over {
+            background: linear-gradient(135deg, rgba(33, 150, 243, 0.15), rgba(156, 39, 176, 0.15)) !important;
+            border-color: var(--secondary);
+            transform: scale(1.02);
+        }
+
+        #medication-pool {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: var(--shadow-lg);
+            margin-bottom: 20px;
+        }
+
+        .pool-header {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: var(--primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .pool-header::before {
+            content: '💊';
+            font-size: 1.2em;
+        }
+
+        .med-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 15px;
+        }
+
+        .med-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 15px;
+            cursor: grab;
+            transition: all 0.3s ease;
+            text-align: center;
+            touch-action: manipulation;
+            user-select: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .med-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, transparent, rgba(33, 150, 243, 0.1));
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .med-card:hover::before {
+            opacity: 1;
+        }
+
+        .med-card:hover, .med-card:active {
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            border-color: var(--secondary);
+        }
+
+        .med-card:active {
+            cursor: grabbing;
+        }
+
+        .med-card.in-drop-zone {
+            border-color: var(--success);
+            background: linear-gradient(135deg, #e8f5e9 0%, #c8e6c9 100%);
+        }
+
+        .med-card img {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+        }
+
+        .med-name {
+            font-weight: 600;
+            color: var(--dark);
+            font-size: 0.95em;
+        }
+
+        #submit-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        #submit-btn {
+            background: linear-gradient(135deg, var(--success), #66bb6a);
+            color: white;
+            border: none;
+            padding: 18px 50px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        #submit-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        #submit-btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        #submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+        }
+
+        #submit-btn:active {
+            transform: translateY(-1px);
+        }
+
+        #submit-btn:disabled {
+            background: linear-gradient(135deg, #bdbdbd, #9e9e9e);
+            cursor: not-allowed;
+            box-shadow: none;
+            opacity: 0.6;
+        }
+
+        #submit-btn:disabled:hover {
+            transform: none;
+        }
+
+        .feedback {
+            text-align: center;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 1.2em;
+            opacity: 0;
+            transform: translateY(-20px);
+            animation: feedbackIn 0.5s forwards;
+            box-shadow: var(--shadow);
+        }
+
+        @keyframes feedbackIn {
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+
+        .correct { 
+            background: linear-gradient(135deg, #d4efdf, #a9dfbf);
+            color: #145a32;
+            border: 2px solid #27ae60;
+        }
+
+        .correct::before {
+            content: '✓ ';
+            font-size: 1.5em;
+        }
+
+        .wrong { 
+            background: linear-gradient(135deg, #fadbd8, #f5b7b1);
+            color: #78281f;
+            border: 2px solid #e74c3c;
+        }
+
+        .wrong::before {
+            content: '✗ ';
+            font-size: 1.5em;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(5px);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            animation: modalIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+        }
+
+        @keyframes modalIn {
+            from { 
+                transform: scale(0.7) translateY(-50px); 
+                opacity: 0; 
+            }
+            to { 
+                transform: scale(1) translateY(0); 
+                opacity: 1; 
+            }
+        }
+
+        .modal-content h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            font-size: 2em;
+        }
+
+        .performance-badge {
+            font-size: 1.5em;
+            padding: 15px 30px;
+            border-radius: 30px;
+            margin: 20px 0;
+            font-weight: bold;
+            box-shadow: var(--shadow);
+        }
+
+        .legendary { 
+            background: linear-gradient(135deg, #f1c40f, #f39c12);
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .hero { 
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+        }
+
+        .well-played { 
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .try-again { 
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .modal-content p {
+            margin: 15px 0;
+            font-size: 1.2em;
+            color: var(--dark);
+        }
+
+        .modal-content button {
+            background: linear-gradient(135deg, var(--secondary), #1976d2);
+            color: white;
+            border: none;
+            padding: 15px 35px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        .modal-content button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
+        }
+
+        #name-modal {
+            display: flex;
+        }
+
+        #name-input-container {
+            background: white;
+            padding: 50px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        #name-input-container h2 {
+            color: var(--primary);
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        #player-name {
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            font-size: 1.1em;
+            transition: all 0.3s ease;
+        }
+
+        #player-name:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 4px rgba(33, 150, 243, 0.1);
+        }
+
+        #name-input-container button {
+            background: linear-gradient(135deg, var(--secondary), #1976d2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.2em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(33, 150, 243, 0.4);
+        }
+
+        #name-input-container button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(33, 150, 243, 0.5);
+        }
+
+        .case-difficulty {
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .difficulty-easy {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+        }
+
+        .difficulty-medium {
+            background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+            color: #856404;
+        }
+
+        .difficulty-hard {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+        }
+
+        .difficulty-expert {
+            background: linear-gradient(135deg, #d6d8db, #c6c8ca);
+            color: #383d41;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-icon {
+                font-size: 2em;
+                width: 50px;
+                height: 50px;
+            }
+
+            .stat-value {
+                font-size: 1.5em;
+            }
+
+            #case-container {
+                padding: 20px;
+            }
+
+            #patient-header {
+                font-size: 1.3em;
+            }
+
+            #symptoms {
+                padding: 18px;
+                font-size: 1em;
+            }
+
+            .med-grid {
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 10px;
+            }
+
+            .med-card {
+                padding: 12px;
+            }
+
+            .med-card img {
+                width: 55px;
+                height: 55px;
+            }
+
+            .med-name {
+                font-size: 0.85em;
+            }
+
+            #submit-btn {
+                padding: 15px 35px;
+                font-size: 1em;
+            }
+
+            .modal-content {
+                padding: 30px 20px;
+            }
+
+            .modal-content h2 {
+                font-size: 1.5em;
+            }
+
+            #name-input-container {
+                padding: 30px 20px;
+            }
+        }
+
+        .hint-button {
+            background: linear-gradient(135deg, var(--warning), #f57c00);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+            font-weight: 600;
+            margin: 10px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.4);
+        }
+
+        .hint-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(255, 152, 0, 0.5);
+        }
+
+        .hint-text {
+            background: linear-gradient(135deg, #fff3e0, #ffe0b2);
+            padding: 15px;
+            border-radius: 10px;
+            border-right: 4px solid var(--warning);
+            margin: 15px 0;
+            font-size: 0.95em;
+            color: #e65100;
+            display: none;
+        }
+
+        .hint-text.show {
+            display: block;
+            animation: fadeIn 0.4s forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="modal" id="name-modal">
+        <div id="name-input-container">
+            <h2> مرحباً بك في محاكي الحالات التنفسية</h2>
+            <p style="color: #666; margin-bottom: 20px;">اختبر معرفتك في وصف أدوية السوق السعودى المناسبة لكل حالة </p>
+            <input type="text" id="player-name" placeholder="أدخل اسمك">
+            <br>
+            <button onclick="startGameWithName()">ابدأ المحاكاة</button>
+        </div>
+    </div>
+
+    <div id="game-container">
+        <div id="score-timer">
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-content">
+                    <div class="stat-label">النقاط</div>
+                    <div class="stat-value" id="score">0</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⏱️</div>
+                <div class="stat-content">
+                    <div class="stat-label">الوقت المتبقي</div>
+                    <div class="stat-value"><span id="timer">90</span>ث</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">📊</div>
+                <div class="stat-content">
+                    <div class="stat-label">الحالة</div>
+                    <div class="stat-value"><span id="case-number">1</span>/<span id="total-cases">5</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="progress-container">
+            <div class="progress-header">
+                <span class="progress-title">التقدم</span>
+                <span class="progress-percentage" id="progress-percentage">0%</span>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+
+        <div id="case-container">
+            <span class="case-difficulty" id="case-difficulty"></span>
+            <h2 id="patient-header">شكوى المريض</h2>
+            <p id="symptoms"></p>
+            <button class="hint-button" onclick="showHint()">💡 عرض تلميح</button>
+            <div class="hint-text" id="hint-text"></div>
+            <div id="drop-zone" class="empty"></div>
+        </div>
+
+        <div id="submit-container">
+            <button id="submit-btn" onclick="checkAnswer()" disabled>تأكيد الإجابة</button>
+        </div>
+
+        <div id="medication-pool">
+            <div class="pool-header">الأدوية المتاحة</div>
+            <div class="med-grid" id="med-grid"></div>
+        </div>
+
+        <div id="feedback" class="feedback"></div>
+    </div>
+
+    <div class="modal" id="endModal">
+        <div class="modal-content">
+            <h2>🎉 انتهت المحاكاة!</h2>
+            <div id="performanceBadge" class="performance-badge"></div>
+            <p><strong>اللاعب:</strong> <span id="playerNameDisplay"></span></p>
+            <p><strong>النقاط النهائية:</strong> <span id="finalScore">0</span></p>
+            <p><strong>الإجابات الصحيحة:</strong> <span id="correctCount">0</span> ✓</p>
+            <p><strong>الإجابات الخاطئة:</strong> <span id="wrongCount">0</span> ✗</p>
+            <p><strong>معدل النجاح:</strong> <span id="successRate">0</span>%</p>
+            <button onclick="restartGame()">🔄 العب مجدداً</button>
+            <button onclick="closeModal()">✖️ خروج</button>
+        </div>
+    </div>
+
+    <script>
+        const cases = [
+        {symptoms: "يا دكتور من فضلك أبغى دواء للكحة عندى كحة مرة مضايقانى وفيها مخاط وبلغم ",
+                correctMeds: ["MUCINEX"],
+                allowedMeds: [  
+                    { name: "DEXTROCOUGH", image: "img/1.png" },
+                    { name: "RIAPHAN", image: "img/2.jpg" },
+                    { name: "MUCINEX", image: "img/3.jpg" }
+                ],
+                difficulty: 1,
+                difficultyLabel: "سهل",
+                hint: "غالبًا محتاج مذيب أو طارد للبلغم"
+            },
+            {
+                symptoms: " يا دكتور من ساعة ما الصيف دخل وانا بعانى من رشح وعطاس شديد وحتى عينى مرة تدمع بس الحمد لله مافى حرارة او صداع ",
+                correctMeds: ["LORIN", "TABUNEX", "SINOCLEAR"],
+                allowedMeds: [
+                    { name: "LORIN", image: "img/4.jpg" },
+                    { name: "TABUNEX", image: "img/5.jpg" },
+                    { name: "SINOCLEAR", image: "img/6.png" },
+                    { name: "SAPOFEN", image: "img/7.png" }
+                ],
+                difficulty: 2,
+                difficultyLabel: "متوسط",
+                hint: "بما إن مفيش حرارة أو صداع فالأعراض دى احتمال كبير تكون حساسية موسمية - المريض يحتاج مضاد هيستامين مع بخاخ "
+            },
+            {
+                symptoms: "يا دكتور من فضلك كنت محتاج حاجة كويسة لنزلات البرد زميلى فى السكن بقايه من امبارح تعبان وجسمه مكسر ومحتاجين حاجة كويسة هو سنة 27 وعنده حرارة وزكام وجسمه مكسر وبيترعش",
+                correctMeds: ["DECOZAL", "BRUFEN", "LORIN"],
+                allowedMeds: [
+                    { name: "SOLPADEINE", image: "img/13.jpg" },
+                    { name: "LORIN", image: "img/4.jpg" },
+                    { name: "DECOZAL", image: "img/10.png" },
+                    { name: "BRUFEN", image: "img/8.jpg" },
+                    { name: "RIAPHAN", image: "img/8.jpg" }
+                ],
+                difficulty: 3,
+                difficultyLabel: "صعب",
+                hint: "نزلة برد شديدة مع حرارة وألم غالبًا دة دور انفلونزا ",
+            },
+            {
+            symptoms: "دكتور من كم يوم عندي كحة جافة خصوصًا بالليل وتزيد لما أتكلم أو أضحك، ما في حرارة ولا بلغم بس الكحة مستمرة ومتعبة جدًا.",
+            correctMeds: ["TUSSIDAN", "HISTOP"],
+            allowedMeds: [
+                { name: "TUSSIDAN", image: "img/14.png" },
+                { name: "HISTOP", image: "img/15.png" },
+                { name: "MUCINEX", image: "img/3.jpg" },
+                { name: "TABUNEX", image: "img/5.jpg" }
+            ],
+            difficulty: 4,
+            difficultyLabel: "محترف",
+            hint: "كحة جافة بدون بلغم أو حرارة غالبًا سببها تهيج أو حساسية بسيطة – يحتاج مضاد هيستامين أو مهدئ للكحة."
+            },
+            {
+                symptoms: "دكتور أنا حاسس بضيق في النفس بسيط مع صفير خفيف خاصة في الليل، بس ما عندي حرارة أو بلغم، وأحيانًا يزيد بعد الغبار.",
+                correctMeds: ["VENTOLIN", "CLARINASE"],
+                allowedMeds: [
+                    { name: "VENTOLIN", image: "img/16.png" },
+                    { name: "CLARINASE", image: "img/17.png" },
+                    { name: "BRUFEN", image: "img/8.jpg" },
+                    { name: "SINOCLEAR", image: "img/6.png" }
+                ],
+                difficulty: 5,
+                difficultyLabel: "خبير",
+                hint: "الأعراض تشير إلى ضيق تنفسي بسيط مرتبط بحساسية أو مهيجات – يحتاج بخاخ موسع للشعب + مضاد هيستامين لتخفيف الالتهاب."
+            },
+            
+            {
+                symptoms: "دكتور والدتي عمرها 65 سنة وعندها ربو مزمن، من امس بدأت تشتكي من ضيق تنفس شديد وكحة وصفير في الصدر، استخدمت البخاخة بتاعتها بس مافيه تحسن كبير",
+                correctMeds: [ "Refer to Physician"],
+                allowedMeds: [
+                    { name: "VENTOLIN", image: "img/9.jpg" },
+                    { name: "PULMICORT", image: "img/11.png" },
+                    { name: "MUCINEX", image: "img/3.jpg" },
+                    { name: "BRUFEN", image: "img/8.jpg" },
+                    { name: "LORIN", image: "img/4.jpg" },
+                    { name: "Refer to Physician", image: "img/1.png" }
+                ],
+                difficulty: 4,
+                difficultyLabel: "محترف",
+                hint: "حالة ربو حادة - يحتاج موسع شعبي سريع المفعول + كورتيزون + طارد بلغم"
+            },{
+                symptoms: "يا دكتور أبغى دواء قوي للحلق والزور، زورِي مرة يوجعني خصوصًا وقت البلع، أحس كأنه ملتهب، أبغى شيء كويس ينفع مضاد حيوي؟",
+                correctMeds: ["STREPSILS", "BRUFEN"],
+                allowedMeds: [
+                    { name: "STREPSILS", image: "img/18.png" },
+                    { name: "BRUFEN", image: "img/8.jpg" },
+                    { name: "HEXAMEDINE", image: "img/19.png" },
+                    { name: "AMOXIL", image: "img/20.png" }
+                ],
+                difficulty: 4,
+                difficultyLabel: "محترف",
+                hint: "لو مافيه حرارة عالية أو صديد، فغالبًا التهاب حلق بسيط أو فيروسي – ما يحتاج مضاد حيوي، ممكن مهدئ ومطهر للحلق مع مسكن ألم."
+            },
+            {
+                symptoms: "يا دكتور ولدي عمره 9 سنين، من أمس حرارته مرتفعة ومعه رشح وضيق نفس خفيف، وأنا مرة قلقان، أبغى له شيء قوي، خايف تكون كورونا.",
+                correctMeds: ["PANADOL CHILDREN", "SALBUTAMOL INHALER", "NASALINE SPRAY"],
+                allowedMeds: [
+                    { name: "PANADOL CHILDREN", image: "img/21.png" },
+                    { name: "SALBUTAMOL INHALER", image: "img/22.png" },
+                    { name: "NASALINE SPRAY", image: "img/23.png" },
+                    { name: "CLARINASE", image: "img/17.png" }
+                ],
+                difficulty: 5,
+                difficultyLabel: "خبير",
+                hint: "الأعراض تدل على عدوى فيروسية في الجهاز التنفسي، مع بداية ضيق نفس – يُعطى خافض حرارة وبخاخ موسع للصدر، ولازم مراجعة الطبيب إذا استمر أو زادت الأعراض."
+            }
+           
+        ];
+
+        let currentCase = 0;
+        let score = 0;
+        let timeLeft = 90;
+        let timerInterval;
+        let correctCount = 0;
+        let wrongCount = 0;
+        let playerName = "";
+        let selectedMeds = [];
+        let draggedItem = null;
+        let hintUsed = false;
+
+        function startGameWithName() {
+            const nameInput = document.getElementById('player-name').value.trim();
+            if (!nameInput) {
+                alert("الرجاء إدخال اسمك!");
+                return;
+            }
+            playerName = nameInput;
+            document.getElementById('name-modal').style.display = 'none';
+            document.getElementById('game-container').style.display = 'block';
+            document.getElementById('total-cases').textContent = cases.length;
+            initGame();
+        }
+
+        function initGame() {
+            loadCase(currentCase);
+            startTimer();
+            updateProgress();
+        }
+
+        function loadCase(caseIndex) {
+            hintUsed = false;
+            document.getElementById('hint-text').classList.remove('show');
+            
+            const caseData = cases[caseIndex];
+            document.getElementById("symptoms").textContent = caseData.symptoms;
+            document.getElementById("case-number").textContent = caseIndex + 1;
+            document.getElementById("hint-text").textContent = caseData.hint;
+            
+            const difficultyEl = document.getElementById("case-difficulty");
+            difficultyEl.textContent = `📌 المستوى: ${caseData.difficultyLabel}`;
+            difficultyEl.className = `case-difficulty difficulty-${getDifficultyClass(caseData.difficulty)}`;
+            
+            const medGrid = document.getElementById("med-grid");
+            medGrid.innerHTML = '';
+            
+            caseData.allowedMeds.forEach(med => {
+                const card = document.createElement("div");
+                card.className = "med-card";
+                card.draggable = true;
+                card.innerHTML = `
+                    <img src="${med.image}" alt="${med.name}" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22%3E%3Crect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%23999%22 font-size=%2212%22%3E💊%3C/text%3E%3C/svg%3E'">
+                    <div class="med-name">${med.name}</div>
+                `;
+                card.addEventListener("dragstart", dragStart);
+                card.addEventListener("dragend", dragEnd);
+                card.addEventListener('click', handleMedicationClick);
+                card.addEventListener('touchstart', handleMedicationClick);
+                medGrid.appendChild(card);
+            });
+            
+            updateDropZoneEmpty();
+        }
+
+        function getDifficultyClass(difficulty) {
+            if (difficulty === 1) return 'easy';
+            if (difficulty === 2) return 'medium';
+            if (difficulty === 3) return 'hard';
+            return 'expert';
+        }
+
+        function showHint() {
+            if (!hintUsed) {
+                document.getElementById('hint-text').classList.add('show');
+                hintUsed = true;
+                score = Math.max(0, score - 20);
+                document.getElementById("score").textContent = score;
+            }
+        }
+
+        function dragStart(e) {
+            draggedItem = e.target.closest('.med-card');
+            e.dataTransfer.effectAllowed = 'move';
+            setTimeout(() => {
+                draggedItem.style.opacity = '0.5';
+            }, 0);
+        }
+
+        function dragEnd(e) {
+            draggedItem.style.opacity = '1';
+        }
+
+        function handleMedicationClick(e) {
+            e.preventDefault();
+            const card = e.currentTarget;
+            toggleMedicationSelection(card);
+        }
+
+        function toggleMedicationSelection(card) {
+            const medication = card.querySelector(".med-name").textContent;
+            const dropZone = document.getElementById("drop-zone");
+            const medGrid = document.getElementById("med-grid");
+
+            if (card.parentElement === medGrid) {
+                if (!selectedMeds.includes(medication)) {
+                    selectedMeds.push(medication);
+                    card.classList.add('in-drop-zone');
+                    dropZone.appendChild(card);
+                }
+            } else {
+                const index = selectedMeds.indexOf(medication);
+                if (index > -1) {
+                    selectedMeds.splice(index, 1);
+                    card.classList.remove('in-drop-zone');
+                    medGrid.appendChild(card);
+                }
+            }
+            updateSubmitButton();
+            updateDropZoneEmpty();
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'move';
+            e.currentTarget.classList.add('drag-over');
+        }
+
+        function handleDragLeave(e) {
+            e.currentTarget.classList.remove('drag-over');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.currentTarget.classList.remove('drag-over');
+            
+            if (!draggedItem) return;
+            
+            const medication = draggedItem.querySelector(".med-name").textContent;
+            const dropZone = document.getElementById("drop-zone");
+            const medGrid = document.getElementById("med-grid");
+
+            if (e.currentTarget === dropZone && draggedItem.parentElement === medGrid) {
+                if (!selectedMeds.includes(medication)) {
+                    selectedMeds.push(medication);
+                    draggedItem.classList.add('in-drop-zone');
+                    dropZone.appendChild(draggedItem);
+                }
+            } else if (e.currentTarget === medGrid && draggedItem.parentElement === dropZone) {
+                const index = selectedMeds.indexOf(medication);
+                if (index > -1) {
+                    selectedMeds.splice(index, 1);
+                    draggedItem.classList.remove('in-drop-zone');
+                    medGrid.appendChild(draggedItem);
+                }
+            }
+            
+            updateSubmitButton();
+            updateDropZoneEmpty();
+        }
+
+        function updateDropZoneEmpty() {
+            const dropZone = document.getElementById("drop-zone");
+            if (selectedMeds.length === 0) {
+                dropZone.classList.add('empty');
+            } else {
+                dropZone.classList.remove('empty');
+            }
+        }
+
+        function updateSubmitButton() {
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = selectedMeds.length === 0;
+        }
+
+        function checkAnswer() {
+            const correctMeds = cases[currentCase].correctMeds;
+            const isCorrect = selectedMeds.length === correctMeds.length &&
+                             correctMeds.every(med => selectedMeds.includes(med));
+
+            const feedback = document.getElementById("feedback");
+            
+            if (isCorrect) {
+                const basePoints = 100;
+                const timeBonus = Math.floor(timeLeft / 2);
+                const difficultyMultiplier = cases[currentCase].difficulty;
+                const hintPenalty = hintUsed ? 30 : 0;
+                const earnedPoints = (basePoints + timeBonus) * difficultyMultiplier - hintPenalty;
+                
+                feedback.innerHTML = `
+                    إجابة صحيحة يا ${playerName}! 🎉<br>
+                    <small style="font-size: 0.8em;">+${earnedPoints} نقطة</small>
+                `;
+                feedback.className = 'feedback correct';
+                
+                playSound('correct');
+                score += earnedPoints;
+                correctCount++;
+                proceedToNextCase();
+            } else {
+                feedback.innerHTML = `
+                    إجابة خاطئة يا ${playerName}! 😔<br>
+                    <small style="font-size: 0.8em;"> ليست هذة أفضل الخيارات لهذة الحالة، حاول مرة أخرى </small>
+                `;
+                feedback.className = 'feedback wrong';
+                
+                playSound('wrong');
+                wrongCount++;
+                timeLeft = Math.max(0, timeLeft - 15);
+                document.getElementById("timer").textContent = timeLeft;
+                returnMedicationsToPool();
+            }
+
+            document.getElementById("score").textContent = score;
+            selectedMeds = [];
+            updateSubmitButton();
+        }
+
+        function returnMedicationsToPool() {
+            const dropZone = document.getElementById("drop-zone");
+            const medGrid = document.getElementById("med-grid");
+            
+            Array.from(dropZone.children).forEach(card => {
+                card.classList.remove('in-drop-zone');
+                medGrid.appendChild(card);
+            });
+            
+            updateDropZoneEmpty();
+        }
+
+        function startTimer() {
+            clearInterval(timerInterval);
+            timeLeft = 90;
+            document.getElementById("timer").textContent = timeLeft;
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById("timer").textContent = timeLeft;
+                
+                if (timeLeft <= 0) handleTimeout();
+            }, 1000);
+        }
+
+        function handleTimeout() {
+            clearInterval(timerInterval);
+            const feedback = document.getElementById("feedback");
+            const correctMeds = cases[currentCase].correctMeds;
+            
+            feedback.innerHTML = `
+                انتهى الوقت يا ${playerName}! ⏰<br>
+                <small style="font-size: 0.8em;">الأدوية الصحيحة: ${correctMeds.join(', ')}</small>
+            `;
+            feedback.className = "feedback wrong";
+            wrongCount++;
+            proceedToNextCase();
+        }
+
+        function proceedToNextCase() {
+            setTimeout(() => {
+                if (currentCase < cases.length - 1) {
+                    currentCase++;
+                    resetCase();
+                } else {
+                    endGame();
+                }
+            }, 3000);
+        }
+
+        function resetCase() {
+            selectedMeds = [];
+            returnMedicationsToPool();
+            document.getElementById('submit-btn').disabled = true;
+            loadCase(currentCase);
+            startTimer();
+            updateProgress();
+            document.getElementById("feedback").textContent = "";
+            document.getElementById("feedback").className = "feedback";
+        }
+
+        function updateProgress() {
+            const progress = ((currentCase + 1) / cases.length) * 100;
+            document.querySelector(".progress-fill").style.width = `${progress}%`;
+            document.getElementById("progress-percentage").textContent = `${Math.round(progress)}%`;
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            sendResultsToServer();
+            showFinalResults();
+        }
+
+        function showFinalResults() {
+            const percentage = (correctCount / cases.length) * 100;
+            const badge = document.getElementById("performanceBadge");
+            
+            let rating = '';
+            if (percentage === 100) {
+                rating = 'legendary';
+                badge.textContent = '🏆 أداء أسطوري!';
+            } else if (percentage >= 80) {
+                rating = 'hero';
+                badge.textContent = '🦸 بطل!';
+            } else if (percentage >= 60) {
+                rating = 'well-played';
+                badge.textContent = '👍 أحسنت!';
+            } else {
+                rating = 'try-again';
+                badge.textContent = '💪 يمكنك التحسن!';
+            }
+            
+            badge.className = `performance-badge ${rating}`;
+            document.getElementById("playerNameDisplay").textContent = playerName;
+            document.getElementById("finalScore").textContent = score;
+            document.getElementById("correctCount").textContent = correctCount;
+            document.getElementById("wrongCount").textContent = wrongCount;
+            document.getElementById("successRate").textContent = Math.round(percentage);
+            document.getElementById("endModal").style.display = 'flex';
+        }
+
+        function restartGame() {
+            window.location.reload();
+        }
+
+        function closeModal() {
+        // Hide the modal
+        document.getElementById("endModal").style.display = 'none';
+
+        // Create bye-bye message
+        const byeMessage = document.createElement("div");
+        byeMessage.innerHTML = "👋 شكراً لمشاركتك! إلى اللقاء!";
+        byeMessage.style.cssText = `
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 25px 40px;
+            border-radius: 20px;
+            font-size: 1.4em;
+            font-family: 'Cairo', sans-serif;
+            text-align: center;
+            z-index: 9999;
+            box-shadow: 0 0 20px rgba(0,0,0,0.3);
+            opacity: 1;
+            transition: opacity 1s ease-in-out;
+        `;
+        document.body.appendChild(byeMessage);
+
+        // After 4 seconds, fade out the message
+        setTimeout(() => {
+            byeMessage.style.opacity = "0";
+        }, 4000);
+
+        // After 5 seconds, remove message and reload or close
+        setTimeout(() => {
+            byeMessage.remove();
+            window.location.reload();
+
+            // Try closing, fallback to reload if blocked
+            // try {
+            //     window.close();
+            //     if (!window.closed) {
+            //         window.location.reload();
+            //     }
+            // } catch (e) {
+            //     window.location.reload();
+            // }
+        }, 5000);
+    }
+
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            if (type === 'correct') {
+                oscillator.frequency.setValueAtTime(523.25, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(659.25, audioContext.currentTime + 0.1);
+                oscillator.frequency.setValueAtTime(783.99, audioContext.currentTime + 0.2);
+            } else {
+                oscillator.frequency.setValueAtTime(300, audioContext.currentTime);
+                oscillator.frequency.setValueAtTime(200, audioContext.currentTime + 0.1);
+            }
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.3);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            const dropZone = document.getElementById("drop-zone");
+            const medGrid = document.getElementById("med-grid");
+
+            [dropZone, medGrid].forEach(zone => {
+                zone.addEventListener('dragover', handleDragOver);
+                zone.addEventListener('dragleave', handleDragLeave);
+                zone.addEventListener('drop', handleDrop);
+            });
+        });
+        async function sendResultsToServer() {
+            const results = {
+                playerName,
+                score,
+                correctCount,
+                wrongCount,
+                successRate: Math.round((correctCount / cases.length) * 100)
+                
+            };
+            console.log(results)
+            fetch('https://script.google.com/macros/s/AKfycbyFbTHtYbx8CrTe7cWe7NJqGUj0ZAIzm2PMOwXxwdiBLyprl91sd7vTHyohTUPT1gVUrQ/exec', {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(results)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Results submitted successfully:', data);
+            })
+            .catch(error => {
+                console.error('Error submitting results:', error);
+            });
+        }
+    </script>
+</body>
+</html>
+
+
+
