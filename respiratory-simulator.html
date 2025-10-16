@@ -826,7 +826,7 @@
 
     <script>
         const cases = [
-        {symptoms: "يا دكتور من فضلك أبغى دواء للكحة عندى كحة مرة مضايقانى وفيها مخاط وبلغم ",
+        {symptoms: "يا دكتور من فضلك أبغى دواء كويس عندى كحة مرة مضايقانى وفيها مخاط وبلغم ",
                 correctMeds: ["MUCINEX"],
                 allowedMeds: [  
                     { name: "DEXTROCOUGH", image: "img/1.png" },
@@ -835,7 +835,21 @@
                 ],
                 difficulty: 1,
                 difficultyLabel: "سهل",
-                hint: "غالبًا محتاج مذيب أو طارد للبلغم"
+                hint: "المريض يحتاج لمذيب أو طارد للبلغم"
+            },
+            {
+                symptoms: "يا دكتور أبغى دواء قوي للحلق والزور، زورِي مرة يوجعني خصوصًا وقت البلع، أحس كأنه ملتهب وما فى حرارة الحمد لله، وأنا أبغى شيء كويس مثلًا مضاد حيوي؟",
+                correctMeds: ["STREPSILS", "BRUFEN"],
+                allowedMeds: [
+                    { name: "STREPSILS", image: "img/21.png" },
+                    { name: "BRUFEN", image: "img/8.jpg" },
+                    { name: "AUGMENTIN", image: "img/15.png" },
+                    { name: "AMOXIL", image: "img/14.png" },
+                    { name: "HISTOFEN", image: "img/16.jpg" }
+                ],
+                difficulty: 2,
+                difficultyLabel: "متوسط",
+                hint: "مادام لا يوجد حرارة عالية، فغالبًا التهاب حلق بسيط أو فيروسي – ما يحتاج مضاد حيوي، ممكن مهدئ ومطهر للحلق مع مسكن ألم."
             },
             {
                 symptoms: " يا دكتور من ساعة ما الصيف دخل وانا بعانى من رشح وعطاس شديد وحتى عينى مرة تدمع بس الحمد لله مافى حرارة او صداع ",
@@ -844,93 +858,82 @@
                     { name: "LORIN", image: "img/4.jpg" },
                     { name: "TABUNEX", image: "img/5.jpg" },
                     { name: "SINOCLEAR", image: "img/6.png" },
-                    { name: "SAPOFEN", image: "img/7.png" }
+                    { name: "SAPOFEN", image: "img/7.png" },
+                    { name: "SOLPADEINE", image: "img/13.jpg" }
                 ],
-                difficulty: 2,
-                difficultyLabel: "متوسط",
-                hint: "بما إن مفيش حرارة أو صداع فالأعراض دى احتمال كبير تكون حساسية موسمية - المريض يحتاج مضاد هيستامين مع بخاخ "
+                difficulty: 3,
+                difficultyLabel: "متقدم",
+                hint: "بما إن مفيش حرارة أو صداع فالأعراض دى غالبًا تشير إلى حساسية موسمية - المريض يحتاج مضاد هيستامين مع بخاخ "
             },
             {
-                symptoms: "يا دكتور من فضلك كنت محتاج حاجة كويسة لنزلات البرد زميلى فى السكن بقايه من امبارح تعبان وجسمه مكسر ومحتاجين حاجة كويسة هو سنة 27 وعنده حرارة وزكام وجسمه مكسر وبيترعش",
+                symptoms: "يا دكتور من فضلك كنت محتاج حاجة كويسة لنزلات البرد زميلى فى السكن بقاله من امبارح تعبان وجسمه مكسر ومحتاجين حاجة كويسة هو سنة 29 وعنده حرارة وزكام وجسمه مكسر وبيترعش",
                 correctMeds: ["DECOZAL", "BRUFEN", "LORIN"],
                 allowedMeds: [
                     { name: "SOLPADEINE", image: "img/13.jpg" },
                     { name: "LORIN", image: "img/4.jpg" },
                     { name: "DECOZAL", image: "img/10.png" },
                     { name: "BRUFEN", image: "img/8.jpg" },
-                    { name: "RIAPHAN", image: "img/8.jpg" }
+                    { name: "RIAPHAN", image: "img/2.jpg" }
                 ],
-                difficulty: 3,
-                difficultyLabel: "صعب",
-                hint: "نزلة برد شديدة مع حرارة وألم غالبًا دة دور انفلونزا ",
+                difficulty: 4,
+                difficultyLabel: "محترف",
+                hint: "أعراض شديدة مع حرارة وألم وتكسير فى الجسم غالبًا تشير إلى دور انفلونزا ",
             },
-            {
-            symptoms: "دكتور من كم يوم عندي كحة جافة خصوصًا بالليل وتزيد لما أتكلم أو أضحك، ما في حرارة ولا بلغم بس الكحة مستمرة ومتعبة جدًا.",
-            correctMeds: ["TUSSIDAN", "HISTOP"],
-            allowedMeds: [
-                { name: "TUSSIDAN", image: "img/14.png" },
-                { name: "HISTOP", image: "img/15.png" },
-                { name: "MUCINEX", image: "img/3.jpg" },
-                { name: "TABUNEX", image: "img/5.jpg" }
-            ],
-            difficulty: 4,
-            difficultyLabel: "محترف",
-            hint: "كحة جافة بدون بلغم أو حرارة غالبًا سببها تهيج أو حساسية بسيطة – يحتاج مضاد هيستامين أو مهدئ للكحة."
-            },
-            {
-                symptoms: "دكتور أنا حاسس بضيق في النفس بسيط مع صفير خفيف خاصة في الليل، بس ما عندي حرارة أو بلغم، وأحيانًا يزيد بعد الغبار.",
-                correctMeds: ["VENTOLIN", "CLARINASE"],
-                allowedMeds: [
-                    { name: "VENTOLIN", image: "img/16.png" },
-                    { name: "CLARINASE", image: "img/17.png" },
-                    { name: "BRUFEN", image: "img/8.jpg" },
-                    { name: "SINOCLEAR", image: "img/6.png" }
-                ],
-                difficulty: 5,
-                difficultyLabel: "خبير",
-                hint: "الأعراض تشير إلى ضيق تنفسي بسيط مرتبط بحساسية أو مهيجات – يحتاج بخاخ موسع للشعب + مضاد هيستامين لتخفيف الالتهاب."
-            },
+            // {
+            // symptoms: "دكتور من كم يوم عندي كحة جافة خصوصًا بالليل وتزيد لما أتكلم أو أضحك، ما في حرارة ولا بلغم بس الكحة مستمرة ومتعبة جدًا.",
+            // correctMeds: ["TUSSIDAN", "HISTOP"],
+            // allowedMeds: [
+            //     { name: "TUSSIDAN", image: "img/14.png" },
+            //     { name: "HISTOP", image: "img/15.png" },
+            //     { name: "MUCINEX", image: "img/3.jpg" },
+            //     { name: "TABUNEX", image: "img/5.jpg" }
+            // ],
+            // difficulty: 4,
+            // difficultyLabel: "محترف",
+            // hint: "كحة جافة بدون بلغم أو حرارة غالبًا سببها تهيج أو حساسية بسيطة – يحتاج مضاد هيستامين أو مهدئ للكحة."
+            // },
+            // {
+            //     symptoms: "دكتور أنا حاسس بضيق في النفس بسيط مع صفير خفيف خاصة في الليل، بس ما عندي حرارة أو بلغم، وأحيانًا يزيد بعد الغبار.",
+            //     correctMeds: ["VENTOLIN", "CLARINASE"],
+            //     allowedMeds: [
+            //         { name: "VENTOLIN", image: "img/16.png" },
+            //         { name: "CLARINASE", image: "img/17.png" },
+            //         { name: "BRUFEN", image: "img/8.jpg" },
+            //         { name: "SINOCLEAR", image: "img/6.png" }
+            //     ],
+            //     difficulty: 5,
+            //     difficultyLabel: "خبير",
+            //     hint: "الأعراض تشير إلى ضيق تنفسي بسيط مرتبط بحساسية أو مهيجات – يحتاج بخاخ موسع للشعب + مضاد هيستامين لتخفيف الالتهاب."
+            // },
             
             {
                 symptoms: "دكتور والدتي عمرها 65 سنة وعندها ربو مزمن، من امس بدأت تشتكي من ضيق تنفس شديد وكحة وصفير في الصدر، استخدمت البخاخة بتاعتها بس مافيه تحسن كبير",
                 correctMeds: [ "Refer to Physician"],
                 allowedMeds: [
-                    { name: "VENTOLIN", image: "img/9.jpg" },
-                    { name: "PULMICORT", image: "img/11.png" },
+                    { name: "VENTOLIN", image: "img/20.jpg" },
+                    { name: "PULMICORT", image: "img/19.jpg" },
                     { name: "MUCINEX", image: "img/3.jpg" },
-                    { name: "BRUFEN", image: "img/8.jpg" },
+                    { name: "XOLAIR", image: "img/17.jpg" },
                     { name: "LORIN", image: "img/4.jpg" },
-                    { name: "Refer to Physician", image: "img/1.png" }
-                ],
-                difficulty: 4,
-                difficultyLabel: "محترف",
-                hint: "حالة ربو حادة - يحتاج موسع شعبي سريع المفعول + كورتيزون + طارد بلغم"
-            },{
-                symptoms: "يا دكتور أبغى دواء قوي للحلق والزور، زورِي مرة يوجعني خصوصًا وقت البلع، أحس كأنه ملتهب، أبغى شيء كويس ينفع مضاد حيوي؟",
-                correctMeds: ["STREPSILS", "BRUFEN"],
-                allowedMeds: [
-                    { name: "STREPSILS", image: "img/18.png" },
-                    { name: "BRUFEN", image: "img/8.jpg" },
-                    { name: "HEXAMEDINE", image: "img/19.png" },
-                    { name: "AMOXIL", image: "img/20.png" }
-                ],
-                difficulty: 4,
-                difficultyLabel: "محترف",
-                hint: "لو مافيه حرارة عالية أو صديد، فغالبًا التهاب حلق بسيط أو فيروسي – ما يحتاج مضاد حيوي، ممكن مهدئ ومطهر للحلق مع مسكن ألم."
-            },
-            {
-                symptoms: "يا دكتور ولدي عمره 9 سنين، من أمس حرارته مرتفعة ومعه رشح وضيق نفس خفيف، وأنا مرة قلقان، أبغى له شيء قوي، خايف تكون كورونا.",
-                correctMeds: ["PANADOL CHILDREN", "SALBUTAMOL INHALER", "NASALINE SPRAY"],
-                allowedMeds: [
-                    { name: "PANADOL CHILDREN", image: "img/21.png" },
-                    { name: "SALBUTAMOL INHALER", image: "img/22.png" },
-                    { name: "NASALINE SPRAY", image: "img/23.png" },
-                    { name: "CLARINASE", image: "img/17.png" }
+                    { name: "Refer to Physician", image: "img/18.png" }
                 ],
                 difficulty: 5,
                 difficultyLabel: "خبير",
-                hint: "الأعراض تدل على عدوى فيروسية في الجهاز التنفسي، مع بداية ضيق نفس – يُعطى خافض حرارة وبخاخ موسع للصدر، ولازم مراجعة الطبيب إذا استمر أو زادت الأعراض."
-            }
+                hint: "حالة ربو حادة تحتاج تقييم طبي عاجل - يجب مراجعة الطبيب فورًا."
+            },
+            // {
+            //     symptoms: "يا دكتور ولدي عمره 9 سنين، من أمس حرارته مرتفعة ومعه رشح وضيق نفس خفيف، وأنا مرة قلقان، أبغى له شيء قوي، خايف تكون كورونا.",
+            //     correctMeds: ["PANADOL CHILDREN", "SALBUTAMOL INHALER", "NASALINE SPRAY"],
+            //     allowedMeds: [
+            //         { name: "PANADOL CHILDREN", image: "img/21.png" },
+            //         { name: "SALBUTAMOL INHALER", image: "img/22.png" },
+            //         { name: "NASALINE SPRAY", image: "img/23.png" },
+            //         { name: "CLARINASE", image: "img/17.png" }
+            //     ],
+            //     difficulty: 5,
+            //     difficultyLabel: "خبير",
+            //     hint: "الأعراض تدل على عدوى فيروسية في الجهاز التنفسي، مع بداية ضيق نفس – يُعطى خافض حرارة وبخاخ موسع للصدر، ولازم مراجعة الطبيب إذا استمر أو زادت الأعراض."
+            // }
            
         ];
 
