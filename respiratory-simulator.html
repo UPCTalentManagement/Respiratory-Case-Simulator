@@ -1367,6 +1367,17 @@
                 console.error('Error submitting results:', error);
             });
         }
+        document.addEventListener('keydown', function(e) {
+    if (
+        e.key === 'F12' ||
+        (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'C')) ||
+        (e.ctrlKey && e.key.toLowerCase() === 'u') || (e.ctrlKey && e.key.toLowerCase() === 's')
+    ) {
+        e.preventDefault();
+        return false;
+    }
+    });
+    document.addEventListener('contextmenu', e => e.preventDefault());
     </script>
 </body>
 </html>
